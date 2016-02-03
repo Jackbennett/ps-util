@@ -16,8 +16,9 @@ function Get-Shortcut
         # Use an existing shortcut to update the target.
         [Parameter(Mandatory=$true,
                    Position=0,
-                   ValueFromPipelineByPropertyName=$true)]
-        [string]
+                   ValueFromPipelineByPropertyName=$true,
+                   ValueFromPipeline=$true)]
+        [string[]]
         $Path
     )
 
@@ -27,11 +28,9 @@ function Get-Shortcut
     }
     Process
     {
-        $absolutePath = (Get-Item $Path).FullName
-        
-        $shell.CreateShortcut($absolutePath) 
-
-        $shortcut
+        $path | ForEach-Object {
+            $shell.CreateShortcut(  (Get-Item $psitem).FullName  )
+        }
     }
     End
     {
