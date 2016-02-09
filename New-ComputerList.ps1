@@ -64,8 +64,7 @@ function New-ComputerList
                     $computerName += ".$domain"
                 }
 
-                New-Object psobject |
-                    Add-Member -MemberType NoteProperty -Name "ComputerName" -Value $computerName -PassThru
+                New-Object psobject -Property @{"ComputerName" = $computerName}
             }
         }
     }
