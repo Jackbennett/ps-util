@@ -1,39 +1,62 @@
-﻿function ConvertTo-ImageFormat {
-[CmdletBinding()]
-param
-(    [Parameter(Mandatory=$True,
-ValueFromPipeline=$false)]
-[string[]]$path,
-[string[]]$oldext,
-[validateset(“bitmap”,”emf”,”exif”,”gif”,”icon”,”jpeg”,”png”,”tiff”,”wmf”)]
-[string[]]$format
-)
-begin {
-if((Test-Path -Path $path))
-{
-}
-Else
-{
-Write-Warning “Path doesn’t exist – error”
-Return
-}
-$files=Get-ChildItem $path |where-object {$_.Extension -eq $oldext}
-$newext =””
+﻿<#
+.Synopsis
+   Convert between image formats
+.DESCRIPTION
+   Convert between image formats with the Windows Forms library.
+.EXAMPLE
+   Example of how to use this cmdlet
+.EXAMPLE
+   Another example of how to use this cmdlet
+.INPUTS
+   Image Files
+.OUTPUTS
+   Image Files
+.NOTES
+   credit: Hazzy, http://hazzy.techanarchy.net/posh/powershell/bmp-to-jpg-the-powershell-way/
+.FUNCTIONALITY
+   Convert between image formats.
+#>
+function ConvertTo-ImageFormat {
+    [CmdletBinding()]
+    param(
+        [Parameter(
+            Mandatory=$True,
+            ValueFromPipeline=$false
+        )]
+        [string[]]
+        $Path
 
-switch($format)
-{
-“bitmap”{$newext =”.bmp”;}
-“emf”{$newext =”.emf”;}
-“exif”{$newext =”.exif”}
-“gif”{$newext =”.gif”}
-“icon”{$newext =”.ico”;}
-“jpeg”{$newext =”.jpg”}
-“png”{$newext =”.png”}
-“tiff”{$newext =”.tif”}
-“wmf”{$newext =”.wmf”}
-}
+        , [string[]]
+        $oldext
 
-}
+        , [validateset(“bitmap”,”emf”,”exif”,”gif”,”icon”,”jpeg”,”png”,”tiff”,”wmf”)]
+        [string[]]
+        $format
+    )
+    begin {
+        if((Test-Path -Path $path)){
+
+        } Else {
+            Write-Warning “Path doesn’t exist – error”
+            Return
+        }
+
+        $files = Get-ChildItem $path | where-object {$_.Extension -eq $oldext}
+        $newext = ””
+
+        switch($format){
+            “bitmap”{$newext = ”.bmp”;}
+            “emf”{$newext = ”.emf”;}
+            “exif”{$newext = ”.exif”}
+            “gif”{$newext =”.gif”}
+            “icon”{$newext =”.ico”;}
+            “jpeg”{$newext =”.jpg”}
+            “png”{$newext =”.png”}
+            “tiff”{$newext =”.tif”}
+            “wmf”{$newext =”.wmf”}
+        }
+
+    }
  process {
 foreach ($file in $files) {
 Write-Verbose “Processing $file to convert to $format”
