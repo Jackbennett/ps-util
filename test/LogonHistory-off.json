@@ -1,0 +1,26 @@
+[
+    {
+        "Username":  "mrT",
+        "LogoffTime":  {
+                           "value":  "\/Date(1463476254657)\/",
+                           "DateTime":  "17 May 2016 10:10:54"
+                       },
+        "ComputerName":  "U05PC01"
+    },
+    {
+        "Username":  "nighthawk",
+        "LogoffTime":  {
+                           "value":  "\/Date(1463479715138)\/",
+                           "DateTime":  "17 May 2016 11:08:35"
+                       },
+        "ComputerName":  "U05PC01"
+    },
+    {
+        "Username":  "mrT",
+        "LogoffTime":  {
+                           "value":  "\/Date(1463495873099)\/",
+                           "DateTime":  "17 May 2016 15:37:53"
+                       },
+        "ComputerName":  "U05PC01"
+    }
+]

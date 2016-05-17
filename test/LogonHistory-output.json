@@ -1,0 +1,50 @@
+[
+    {
+        "Username":  "mrT",
+        "LogonTime":  {
+                          "value":  "\/Date(1463469194607)\/",
+                          "DateTime":  "17 May 2016 08:13:14"
+                      },
+        "ComputerName":  "U05PC01",
+        "LogOffTime":  [
+                           {
+                               "value":  "\/Date(1463476254657)\/",
+                               "DateTime":  "17 May 2016 10:10:54"
+                           },
+                           {
+                               "value":  "\/Date(1463495873099)\/",
+                               "DateTime":  "17 May 2016 15:37:53"
+                           }
+                       ]
+    },
+    {
+        "Username":  "nighthawk",
+        "LogonTime":  {
+                          "value":  "\/Date(1463476446471)\/",
+                          "DateTime":  "17 May 2016 10:14:06"
+                      },
+        "ComputerName":  "U05PC01",
+        "LogOffTime":  {
+                           "value":  "\/Date(1463479715138)\/",
+                           "DateTime":  "17 May 2016 11:08:35"
+                       }
+    },
+    {
+        "Username":  "mrT",
+        "LogonTime":  {
+                          "value":  "\/Date(1463487168783)\/",
+                          "DateTime":  "17 May 2016 13:12:48"
+                      },
+        "ComputerName":  "U05PC01",
+        "LogOffTime":  [
+                           {
+                               "value":  "\/Date(1463476254657)\/",
+                               "DateTime":  "17 May 2016 10:10:54"
+                           },
+                           {
+                               "value":  "\/Date(1463495873099)\/",
+                               "DateTime":  "17 May 2016 15:37:53"
+                           }
+                       ]
+    }
+]

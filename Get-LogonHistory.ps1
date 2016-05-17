@@ -89,7 +89,7 @@ function Get-LogonHistory
             # Grab the events from a remote computer
             $EventLog = Get-WinEvent -ComputerName $ComputerName -FilterHashtable @{
                             Logname = 'Security';
-                            Id = 4624;
+                            Id = 4624,4647;
                             StartTime = $StartDay.toShortDateString();
                             EndTime = $StopDay.toShortDateString();
                         } -ErrorAction Stop
@@ -119,13 +119,14 @@ function Get-LogonHistory
         }
 
         # Select only "real user at the keyboard" logon types.
-        $EventLog |
+
+        $logon = $EventLog |
             Where logonType -In $FilterType |
             Select-Object @{
                     name='Username';
                     expression={ $_.TargetUserName }
                 },@{
-                    name='Time';
+                    name='LogonTime';
                     expression={ $_.TimeCreated }
                 },@{
                     name='ComputerName';
@@ -133,7 +134,40 @@ function Get-LogonHistory
                         # To strip the dollar appended from the event log string
                         $_.SubjectUserName.Replace('$','')
                     }
-                }
+                } |
+                Sort-Object "LogonTime"
+
+        $logoff = $EventLog |
+            Where id -EQ 4647 |
+            Select-Object @{
+                    name='Username';
+                    expression={ $_.TargetUserName }
+                },@{
+                    name='LogoffTime';
+                    expression={ $_.TimeCreated }
+                },@{
+                    name='ComputerName';
+                    expression={
+                        # To strip the dollar appended from the event log string
+                        $_.MachineName.Replace('.BHS.INTERNAL','')
+                    }
+                } |
+                Sort-Object "LogoffTime"
+
+        $logon |
+            where {
+                ($_.username -in $logoff.username) -and ($_.ComputerName -in $logoff.ComputerName)
+            } |
+            ForEach-Object {
+                $ref = $psitem;
+                $psitem |
+                Add-Member -Force -PassThru -NotePropertyName "LogOffTime" -notepropertyValue $(
+                    $logoff |
+                    where username -eq $ref.username |
+                    select -ExpandProperty LogOffTime
+
+                )
+            }
     }
     End
     {
