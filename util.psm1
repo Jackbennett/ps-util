@@ -1,11 +1,15 @@
-﻿$modules = Import-LocalizedData -FileName 'util.psd1'
+﻿Push-Location $PSScriptRoot
 
-$modules.FunctionsToExport |
+$modules = Import-LocalizedData -FileName 'util.psd1'
+
+$files = Get-ChildItem
+$filtered = $modules.FunctionsToExport |
     ForEach {
         $name = $psItem
-        $files.Where( {$psitem -like "*$name*"} )
+        $files.Where( {$psitem.name -like "*$name*"} )
     } |
-    sort -Unique |
-    Foreach {
+    ForEach {
         . $_.FullName
     }
+
+Pop-Location
