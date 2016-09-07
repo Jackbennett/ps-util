@@ -2,7 +2,7 @@
 .Synopsis
    Watch for new files
 .DESCRIPTION
-   Watch a target path for new files and log to the console
+   Watch a target path for new files
 .EXAMPLE
     Watch-Here -Wait
     The file 'test - Copy.txt' was Created at 06/12/2015 11:13:08
@@ -12,6 +12,8 @@
     Id   Name       PSJobTypeName   State         HasMoreData   Location   Command
     --   ----       -------------   -----         -----------   --------   -------
     28   Created                    NotStarted    False                    ...
+.EXAMPLE
+    $Job = Watch-Here -Path 'C:\temp\Share\*' -Action { mv 'C:\temp\Share\*' 'C:\private'; write-host "Moved share to private" }
 #>
 function Watch-Here
 {
@@ -21,7 +23,7 @@ function Watch-Here
         # Specifies the path to watch
         [Parameter(ValueFromPipelineByPropertyName=$true,
                    Position=0)]
-        $Path = "."
+        $Path = $PSScriptRoot
 
         , # Specify a filesystem filter script
         [string]
@@ -39,6 +41,15 @@ function Watch-Here
         , # Include Subdirectories
         [switch]
         $Recurse
+
+        , # Action
+        [scriptblock]
+        $Action = {
+            $Name = $Event.SourceEventArgs.Name
+            $Type = $Event.SourceEventArgs.ChangeType
+            $Time = $Event.TimeGenerated
+            Write-Output "$Time`: $Type the file '$Name'"
+        }
     )
 
     Begin
@@ -47,6 +58,7 @@ function Watch-Here
         if($event){
             Unregister-Event -SourceIdentifier $EventName -Confirm
         }
+
     }
     Process
     {
@@ -55,12 +67,7 @@ function Watch-Here
             NotifyFilter = [IO.NotifyFilters]'FileName, LastWrite'
         }
 
-        $handler = Register-ObjectEvent -InputObject $watch -EventName $EventName -SourceIdentifier $EventName -Action {
-            $Name = $Event.SourceEventArgs.Name
-            $Type = $Event.SourceEventArgs.ChangeType
-            $Time = $Event.TimeGenerated
-            Write-Host "$Time`: $Type the file '$Name'"
-        }
+        $handler = Register-ObjectEvent -InputObject $watch -EventName $EventName -SourceIdentifier $EventName -Action $Action
 
         if($Wait)
         {
