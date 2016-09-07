@@ -8,18 +8,18 @@
 .EXAMPLE
     Get-User
 
-    Name    Username    
-    ----    --------    
+    Name    Username
+    ----    --------
     ITSPC02 Contoso\exampleUser
 .EXAMPLE
     New-ComputerList -Room U05 -Computer (1..4) | Get-User
 
-    Name    Username            
-    ----    --------            
-    U05PC01 BHS\smoss           
-    U05PC02 BHS\15gray-rollingso
-    U05PC03 BHS\15blacke        
-    U05PC04 BHS\15selbyT   
+    Name    Username
+    ----    --------
+    U05PC01 BHS\userA
+    U05PC02 BHS\userB
+    U05PC03 BHS\userC
+    U05PC04 BHS\userD
 #>
 function Get-User
 {
