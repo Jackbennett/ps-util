@@ -7,17 +7,38 @@
    Pipeline output is an object with properties computerName
 
 .EXAMPLE
-   new-computerList -roomName 50 -computer (8..11)
+   New-ComputerList -Room 50 -Computer (8..11)
 
-   Output: 50-08, 50-09, 50-10, 50-11
-
+    ComputerName
+    ------------
+    50PC08
+    50PC09
+    50PC10
+    50PC11
 .EXAMPLE
-    new-computerList 40 -computer 2,3,4,10 | copy-mimics
+    New-ComputerList 40 -Computer 2,3,4,10 | Invoke-Command { ... }
+
+    Pipe the computer name into a remote execution command.
+.EXAMPLE
+    New-ComputerList o16 (1..10) -unc g
+
+    ComputerName
+    ------------
+    \\o16PC01\g$\
+    \\o16PC02\g$\
+    \\o16PC03\g$\
+    \\o16PC04\g$\
+    \\o16PC05\g$\
+    \\o16PC06\g$\
+    \\o16PC07\g$\
+    \\o16PC08\g$\
+    \\o16PC09\g$\
+    \\o16PC10\g$\
 #>
 function New-ComputerList
 {
-    [CmdletBinding()]
-    [OutputType([psobject])]
+    [CmdletBinding(DefaultParameterSetName='Name')]
+    [OutputType([String])]
     Param
     (
         # Room number
@@ -33,9 +54,22 @@ function New-ComputerList
         [int[]]
         $Computer = 1
 
-        , # Add Full Qualified Domain name
+        , # Return a Full Qualified Domain name
+        [Parameter(ParameterSetName='Name')]
         [switch]
         $FQDN = $false
+
+        , # Return a UNC Path
+        [Parameter(ParameterSetName='File Path')]
+        [switch]
+        $UNC
+
+        , # Drive letter
+        [Parameter(ParameterSetName='File Path',
+                   Position=2)]
+        [ValidateSet('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z')]
+        [string]
+        $Drive = 'c'
     )
 
     Begin
@@ -61,10 +95,12 @@ function New-ComputerList
                 if($FQDN)
                 {
                     Write-Verbose ('Adding FQDN [' + $domain + '] to ' + $computerName + ' computer')
-                    $computerName += ".$domain"
+                    New-Object -TypeName psobject -Property @{"ComputerName" = $computerName += ".$domain"}
                 }
 
-                New-Object psobject -Property @{"ComputerName" = $computerName}
+                if($UNC){
+                    New-Object -TypeName psobject -Property @{"Path" = "\\$computerName\$Drive$\"}
+                }
             }
         }
     }
