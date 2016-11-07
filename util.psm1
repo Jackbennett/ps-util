@@ -12,4 +12,6 @@ $filtered = $modules.FunctionsToExport |
         . $_.FullName
     }
 
+. .\SystemInformation.ps1
+
 Pop-Location
