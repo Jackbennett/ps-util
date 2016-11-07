@@ -1,17 +1,13 @@
 ﻿Push-Location $PSScriptRoot
 
-$modules = Import-LocalizedData -FileName 'util.psd1'
-
-$files = Get-ChildItem
-$filtered = $modules.FunctionsToExport |
-    ForEach {
-        $name = $psItem
-        $files.Where( {$psitem.name -like "*$name*"} )
-    } |
+# Import all single function files
+Get-ChildItem -Filter '*-*' |
     ForEach {
         . $_.FullName
     }
 
+# Import function collections
 . .\SystemInformation.ps1
+. .\Shortcut.ps1
 
 Pop-Location
