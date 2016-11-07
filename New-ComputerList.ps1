@@ -37,7 +37,7 @@
 #>
 function New-ComputerList
 {
-    [CmdletBinding(DefaultParameterSetName='Name')]
+    [CmdletBinding(DefaultParameterSetName='Default')]
     [OutputType([String])]
     Param
     (
@@ -54,17 +54,22 @@ function New-ComputerList
         [int[]]
         $Computer = 1
 
-        , # Return a Full Qualified Domain name
-        [Parameter(ParameterSetName='Name')]
-        [switch]
-        $FQDN = $false
+        , # Exclude specific numbers
+        [Parameter(Position=2)]
+        [int[]]
+        $Exclude
 
-        , # Return a UNC Path
+        , # Use a Fully Qualified Domain name
+        [Parameter(ParameterSetName='Default')]
+        [switch]
+        $FQDN
+
+        , # Use a UNC path
         [Parameter(ParameterSetName='File Path')]
         [switch]
         $UNC
 
-        , # Drive letter
+        , # Drive letter in UNC path
         [Parameter(ParameterSetName='File Path',
                    Position=2)]
         [ValidateSet('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z')]
@@ -76,12 +81,14 @@ function New-ComputerList
     {
         #What's the fully qualified domain name in case we need it
         $domain = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain().name
+
+        $Computer = $Computer.where({ $psitem -notin $Exclude })
     }
 
     Process
     {
         # We need to build the string ROOM-COMPUTER
-        
+
         # So for each room we've been given
         foreach($r in $room){
             Write-Verbose "Making list for Room: $r"
@@ -92,15 +99,20 @@ function New-ComputerList
                 # Add this string to our list of computernames with a fully qualified domain name
                 $computerName = "$r`PC$( $c.toString('00') )"
 
-                if($FQDN)
-                {
+                $value = New-Object -TypeName psobject
+                $value | add-member -MemberType NoteProperty -name 'ComputerName' -value $computerName
+
+                if($FQDN){
                     Write-Verbose ('Adding FQDN [' + $domain + '] to ' + $computerName + ' computer')
-                    New-Object -TypeName psobject -Property @{"ComputerName" = $computerName += ".$domain"}
+                    $value | add-member -MemberType NoteProperty -name 'ComputerName' -value "$computerName.$domain" -Force
                 }
 
                 if($UNC){
-                    New-Object -TypeName psobject -Property @{"Path" = "\\$computerName\$Drive$\"}
+                    Write-Verbose ('Adding Path \\' + $computerName + ' of drive ' + $Drive)
+                    $value | add-member -MemberType NoteProperty -name 'Path'-value "\\$computerName\$Drive$\"
                 }
+
+                $value
             }
         }
     }
