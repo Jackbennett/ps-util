@@ -1,41 +1,37 @@
 <#
 .Synopsis
-   Create a new shortcut instance to edit
+   Create a new shortcut with specified properties
 .DESCRIPTION
-   Copy the source shortcut into a variable to edit with the WScript shell methods
-
+   Bypass Windows GUI property validation when setting shortcut attributes.
 .EXAMPLE
-   new-shortcut '.\GIMP.lnk' -newname 'GIMP 2.8'
-
-
+   New-Shortcut '.\GIMP.lnk' -newname 'GIMP 2.8'
 #>
-function new-shortcut
+function New-Shortcut
 {
-    [CmdletBinding(SupportsShouldProcess=$true)]
+    [CmdletBinding()]
     Param
     (
         # Use an existing shortcut to update the target.
         [Parameter(Mandatory=$true,
-                   Position=0,
+                   Position=0)]
+        [string]
+        $Template
+
+        , # New shortcut location
+        [Parameter(Mandatory=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [string]
-        $template
+        $Path
 
-        , # If no path is set, use the same directory as the source
-        [string]
-        [Parameter(Mandatory=$true,
-        ValueFromPipelineByPropertyName=$true)]
-        $destination
-
-        , #
-        [string]
+        , # File path to target execution
         [Parameter(ValueFromPipelineByPropertyName=$true)]
-        $targetPath = "C:\Program Files\"
-
-        , # This is the "Comment" field under "Properties"
         [string]
+        $TargetPath = "C:\Program Files\"
+
+        , # The "Comment" field under "Properties"
         [Parameter(ValueFromPipelineByPropertyName=$true)]
-        $description = "New Shortcut Link"
+        [string]
+        $Description = "New Shortcut Link"
 
     )
 
@@ -45,11 +41,13 @@ function new-shortcut
     }
     Process
     {
-        Copy-Item $template $destination  ## Get the lnk we want to use as a template
-        $shortcut = $shell.CreateShortcut($destination)  ## Open the lnk
+        $dest = Get-Item $Path
+        $target = Get-Item $TargetPath
+        Copy-Item $Template $dest.FullName  ## Get the lnk we want to use as a template
+        $shortcut = $shell.CreateShortcut($dest.FullName)  ## Open the lnk
 
-        $shortcut.TargetPath = $targetPath
-        $shortcut.Description = $description
+        $shortcut.TargetPath = $target.FullName
+        $shortcut.Description = $Description
         $shortcut.Save()
     }
     End
