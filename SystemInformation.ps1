@@ -33,8 +33,12 @@ function Get-StartTime
     }
     Process
     {
-        $object = $Computername | Get-CimInstance -ClassName win32_operatingsystem -Property $property | Select-Object ($property + @{n='computername';e={$psItem.CSName}})
-        $object | Add-Member -MemberType ScriptMethod -Name Uptime -Value {New-TimeSpan $PSItem.lastBootUpTime} -PassThru
+        $object = $Computername | Get-CimInstance -ClassName win32_operatingsystem -Property $property | Select-Object $property
+        $object | Add-Member -MemberType AliasProperty -Name 'ComputerName' -Value "CSName"
+        $object |
+            Add-Member -PassThru -MemberType 'ScriptProperty' -Name 'UpTime' -Value {
+                '{0:d\.h\:mm\:ss}' -f (New-TimeSpan $this.lastBootUpTime)
+            }
     }
     End
     {
