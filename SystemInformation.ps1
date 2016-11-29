@@ -24,12 +24,12 @@ function Get-StartTime
         # Property names to get.
         [Parameter(Position=1)]
         [string[]]
-        $property = @('InstallDate','LastBootUpTime')
+        $property = @('InstallDate')
     )
 
     Begin
     {
-        $property += 'CSName'
+        $property += 'CSName', 'LastBootUpTime'
     }
     Process
     {
