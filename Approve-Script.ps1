@@ -30,6 +30,8 @@ function Approve-Script
         $CertificateStore = "Cert:\CurrentUser\My"
         , # which certificate to use in the given store.
         $StoreIndex = 0
+        , # Timestamp Service to fix the signature to a known point in Time
+        $TimetampServer = 'http://timestamp.verisign.com/scripts/timstamp.dll'
     )
 
     Begin
@@ -46,10 +48,10 @@ function Approve-Script
     }
     Process
     {
-        $Name | Set-AuthenticodeSignature -Certificate $private:cert
+        $Name | Set-AuthenticodeSignature -Certificate $private:cert -TimestampServer -IncludeChain all
     }
     End
     {
-        
+
     }
 }
