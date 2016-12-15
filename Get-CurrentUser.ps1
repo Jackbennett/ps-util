@@ -21,7 +21,7 @@
     U05PC03 BHS\userC
     U05PC04 BHS\userD
 #>
-function Get-User
+function Get-CurrentUser
 {
     [CmdletBinding()]
     [Alias()]
