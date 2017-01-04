@@ -48,7 +48,7 @@ function Approve-Script
     }
     Process
     {
-        $Name | Set-AuthenticodeSignature -Certificate $private:cert -TimestampServer -IncludeChain all
+        $Name | Set-AuthenticodeSignature -Certificate $private:cert -TimestampServer $TimetampServer -IncludeChain all
     }
     End
     {
