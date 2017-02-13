@@ -20,11 +20,12 @@ function Approve-Script
     (
         # The script to sign
         [Parameter(Mandatory=$true,
+                   ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true,
                    Position=0)]
-        [Alias('Path')]
+        [Alias('Name')]
         [String[]]
-        $Name
+        $Path
 
         , # Path to the certificate store to use.
         $CertificateStore = "Cert:\CurrentUser\My"
@@ -48,7 +49,7 @@ function Approve-Script
     }
     Process
     {
-        $Name | Set-AuthenticodeSignature -Certificate $private:cert -TimestampServer $TimetampServer -IncludeChain all
+        $Path | Set-AuthenticodeSignature -Certificate $private:cert -TimestampServer $TimetampServer -IncludeChain all
     }
     End
     {
