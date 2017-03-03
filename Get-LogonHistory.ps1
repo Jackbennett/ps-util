@@ -122,10 +122,10 @@ function Get-LogonHistory
         $EventLog |
             Where logonType -In $FilterType |
             Select-Object @{
-                    name='Username';
+                    name='Identity';
                     expression={ $_.TargetUserName }
                 },@{
-                    name='Time';
+                    name='LogonTime';
                     expression={ $_.TimeCreated }
                 },@{
                     name='ComputerName';
