@@ -14,7 +14,7 @@ function ConvertTo-Base64 {
 
     Process{
         $Text = Get-content -raw -Path $Path
-        $String = [Convert]::ToBase64String( [System.Text.Encoding]::Unicode.GetBytes($Text) )
+        $String = [Convert]::ToBase64String( [System.Text.Encoding]::UTF8.GetBytes($Text) )
 
         Write-Output $String
     }
@@ -34,7 +34,7 @@ function ConvertFrom-Base64 {
         $EncodedString
     )
     Process{
-        $String = [System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String($EncodedString))
+        $String = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($EncodedString))
         Write-Output $String
     }
 }
