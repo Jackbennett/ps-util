@@ -58,7 +58,7 @@ function New-Shortcut
     }
     End
     {
-        [System.Runtime.Interopservices.Marshal]::ReleaseComObject($shell)
+        [System.Runtime.Interopservices.Marshal]::ReleaseComObject($shell) > $null
         Remove-Variable shell
     }
 }
