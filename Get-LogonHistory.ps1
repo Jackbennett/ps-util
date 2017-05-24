@@ -50,6 +50,10 @@ function Get-LogonHistory
         [ValidateSet("Local", "Remote")]
         [string]
         $Type = "local"
+
+        , # Credential to access target computers
+        [System.Management.Automation.PSCredential]
+        $Credential
     )
 
     Begin
@@ -87,7 +91,7 @@ function Get-LogonHistory
         try
         {
             # Grab the events from a remote computer
-            $EventLog = Get-WinEvent -ComputerName $ComputerName -FilterHashtable @{
+            $EventLog = Get-WinEvent -ComputerName $ComputerName -Credential:$Credential -FilterHashtable @{
                             Logname = 'Security';
                             Id = 4624;
                             StartTime = $StartDay.toShortDateString();
@@ -97,7 +101,10 @@ function Get-LogonHistory
             switch ($ComputerName)
             {
                 'localhost' { Write-Error "Must run as an Administrator to acces logs for $ComputerName" }
-                Default {Write-Error "$ComputerName cannot be found"}
+                Default {
+                    Write-Error "$ComputerName cannot be found"
+                    throw $error[1]
+                }
             }
         }
 
