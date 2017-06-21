@@ -157,9 +157,10 @@ function Get-Memory
     {
         # Inconsistent notation to increase readability.
         $ListOfMemory = @{
-            0  = "DDR 3"
-            21 = "DDR-2"
             20 = "DDR"
+            21 = "DDR 2"
+            24 = "DDR 3" # Windows 10
+            0  = "DDR 3" # Windows 7
         }
 
         $Speed = @{
@@ -197,6 +198,7 @@ function Get-Memory
             select `
                 $SourceComputer,
                 Manufacturer,
+                PartNumber,
                 $Speed,
                 $Capacity,
                 DeviceLocator,
