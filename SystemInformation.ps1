@@ -176,7 +176,7 @@ function Get-Memory
             }
         }
         $SourceComputer = @{
-            Name = "Computer Name"
+            Name = "ComputerName"
             Expression={
                 $_.__SERVER
             }
