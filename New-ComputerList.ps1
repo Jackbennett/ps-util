@@ -38,7 +38,7 @@
 function New-ComputerList
 {
     [CmdletBinding(DefaultParameterSetName='Default')]
-    [OutputType([String])]
+    [OutputType([System.Management.Automation.PSCustomObject])]
     Param
     (
         # Room number
@@ -99,7 +99,7 @@ function New-ComputerList
                 # Add this string to our list of computernames with a fully qualified domain name
                 $computerName = "$r`PC$( $c.toString('00') )"
 
-                $value = New-Object -TypeName psobject
+                $value = New-Object -TypeName PSCustomObject
                 $value | add-member -MemberType NoteProperty -name 'ComputerName' -value $computerName
 
                 if($FQDN){
