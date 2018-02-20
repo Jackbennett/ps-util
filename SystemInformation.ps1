@@ -1,12 +1,41 @@
 <#
 .Synopsis
-    Find the system install and last boot dates
+    Find system properties like install, last boot date calculates uptimes
 .DESCRIPTION
-    Get an object for a target computers last
+    Get objects containing boot times or additionally specified operating system properties.
+
+    Other usefull properties;
+    Catption - Operating system version name
+    Version - OS Number
+
+    Also see, Get-Memory
 .EXAMPLE
-   Example of how to use this cmdlet
+    Get-StartTime -Credential $cred -ComputerName $onlineList | sort uptime | ft
+
+    Get a useful table of machines in your org.
+
+    InstallDate         CSName LastBootUpTime      ComputerName UpTime               UpTimeMessage
+    -----------         ------ --------------      ------------ ------               -------------
+    21/08/2013 11:21:09 BKS01  10/01/2018 06:56:32 BKS01        04:08:38.9171087     0 Days 4 Hours 8 Minutes
+    16/08/2013 17:06:23 AVS01  10/01/2018 02:51:48 AVS01        08:13:22.4822857     0 Days 8 Hours 13 Minutes
+    16/08/2013 17:42:26 FS01   10/01/2018 02:34:12 FS01         08:30:59.3236737     0 Days 8 Hours 30 Minutes
+    16/08/2013 17:46:34 WDS01  10/01/2018 02:25:52 WDS01        08:39:19.2876961     0 Days 8 Hours 39 Minutes
 .EXAMPLE
-   Another example of how to use this cmdlet
+    Get-StartTime -Credential $cred -ComputerName $onlineList
+
+    InstallDate    : 20/08/2013 13:20:10
+    CSName         : PS01
+    LastBootUpTime : 31/10/2017 01:19:03
+    ComputerName   : PS01
+    UpTime         : 71.09:16:06.3147368
+    UpTimeMessage  : 71 Days 9 Hours 16 Minutes
+
+    InstallDate    : 16/08/2013 17:46:34
+    CSName         : WDS01
+    LastBootUpTime : 10/01/2018 02:25:52
+    ComputerName   : WDS01
+    UpTime         : 08:09:17.2712937
+    UpTimeMessage  : 0 Days 8 Hours 9 Minutes
 #>
 function Get-StartTime
 {
@@ -15,33 +44,66 @@ function Get-StartTime
     Param
     (
         # Target computer name.
-        [Parameter(ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true,
-                   Position=0)]
+        [Parameter(Position=0,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [Parameter(ParameterSetName='Remote',
+                   Position=0,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [parameter(ParameterSetName='Cred',
+                   Mandatory,
+                   Position=0,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [string[]]
-        $ComputerName = 'localhost',
+        $ComputerName,
 
-        # Property names to get.
+        # Value names to fetch.
         [Parameter(Position=1)]
         [string[]]
-        $property = @('InstallDate')
+        $Property = @('InstallDate'),
+
+        # Identity to use
+        [parameter(ParameterSetName='Cred')]
+        [System.Management.Automation.PSCredential]
+        $Credential
     )
 
     Begin
     {
-        $property += 'CSName', 'LastBootUpTime'
+        $Property += @('CSName', 'LastBootUpTime')
+        $parameters = @{
+            ClassName = 'win32_operatingSystem'
+            Property = $Property | Select-object -Unique
+            ErrorAction = 'Stop'
+        }
+        switch($PsCmdlet.ParameterSetName){
+            "Cred" {
+                $parameters.CimSession = New-CimSession -ComputerName $ComputerName -Credential $Credential
+            }
+            "Remote" {
+                $parameters.CimSession = $ComputerName | New-CimSession
+            }
+        }
     }
     Process
     {
-        $object = $Computername | Get-CimInstance -ClassName win32_operatingsystem -Property $property | Select-Object $property
-        $object | Add-Member -MemberType AliasProperty -Name 'ComputerName' -Value "CSName"
-        $object |
-            Add-Member -PassThru -MemberType 'ScriptProperty' -Name 'UpTime' -Value {
-                '{0:d\.h\:mm\:ss}' -f (New-TimeSpan $this.lastBootUpTime)
+        $object = Get-CimInstance @parameters | Select-Object $property
+        $object | Add-Member -MemberType 'AliasProperty' -Name 'ComputerName' -Value "CSName"
+        $object | Add-Member -MemberType 'ScriptProperty' -Name 'UpTime' -Value {
+                New-TimeSpan $this.lastBootUpTime
             }
+        $object | Add-Member -MemberType 'ScriptProperty' -Name 'UpTimeMessage' -Value {
+                '{0} Days {1} Hours {2} Minutes' -f $this.UpTime.Days, $this.UpTime.Hours, $this.UpTime.Minutes
+            }
+        Write-Output $object
     }
     End
     {
+        # Remove opened session that collected information.
+        # Hide errors if session is empty when credential isn't used.
+        $parameters.CimSession | Remove-CimSession -ErrorAction 'SilentlyContinue'
     }
 }
 
