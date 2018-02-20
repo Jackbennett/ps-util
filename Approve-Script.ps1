@@ -2,7 +2,8 @@
 .Synopsis
    Sign the given script
 .DESCRIPTION
-   Use the default key at the top of the current users certificate store
+   Use the first certificate in the current users certificate personal store.
+   Signs scripts with a timestamp such that certificate expiry does not halt script execution.
 .EXAMPLE
    Approve-Script .\HelloWorld.ps1
 
@@ -11,6 +12,10 @@
    Get-ChildItem . | Approve-Script
 
    Sign everything in the current folder.
+.EXAMPLE
+   cp -PassThru .\HelloWorld.ps1 \\server\Deployment\ | Approve-Script
+
+   Copy a script to a central location whilst signing it for other people to trust execution.
 #>
 function Approve-Script
 {
