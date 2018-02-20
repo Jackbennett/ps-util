@@ -102,70 +102,110 @@ function Get-StartTime
     End
     {
         # Remove opened session that collected information.
-        # Hide errors if session is empty when credential isn't used.
+        # Hide errors if session is empty when Credential isn't used.
         $parameters.CimSession | Remove-CimSession -ErrorAction 'SilentlyContinue'
     }
 }
 
 <#
 .Synopsis
-   List free space and total sizes on selected machines.
+    List free space and total sizes on selected machines.
 .DESCRIPTION
-   List free space and total sizes on selected machines.
+    Get all disk information available from specified computers
 .EXAMPLE
-   Example of how to use this cmdlet
-.EXAMPLE
-   Another example of how to use this cmdlet
+    Get-FreeSpace
+
+    ComputerName ID ProviderName                                   FreeGB  SizeGB Percent
+    ------------ -- ------------                                   ------  ------ -------
+    ThisComputer A:                                                 188.3  299.81    62.8
+    ThisComputer C:                                                 66.81  117.57   56.83
+    ThisComputer D:                                                267.59  399.87   66.92
+    ThisComputer E:                                                     0       0
+    ThisComputer G: \\Server1\shared$                               66.99  698.49    9.59
+    ThisComputer L: \\Server1\Project$                              66.99  698.49    9.59
+    ThisComputer M: \\Server2\manage$                               70.53     100   70.53
+    ThisComputer N: \\Server1\home$\users\name...                 1396.35 1862.64   74.97
+    ThisComputer O: \\Server1\office$                               66.99  698.49    9.59
+    ThisComputer P: \\Server3\programs$                             26.89     150   17.93
+    ThisComputer Q: \\Server4\secret$                               66.99  698.49    9.59
+    ThisComputer S: \\Server5\application                           18.61     200     9.3
+    ThisComputer T: \\Server4\staff$                                66.99  698.49    9.59
+    ThisComputer V: \\Server6\work$                               1144.24 1862.64   61.43
+    ThisComputer W: \\Server6\work2$                               434.53  698.49   62.21
+    ThisComputer X: \\Server4\shortcut$                           1396.35 1862.64   74.97
 #>
 function Get-FreeSpace
 {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName="Default")]
     [OutputType([psobject])]
     Param
     (
-        # Target computer names
+        # Target Systems
         [Parameter(ValueFromPipelineByPropertyName=$true,
-                   Position=0)]
+                   Position=0,
+                   Mandatory,
+                   ParameterSetName='Credential')]
+        [string[]]
         $ComputerName = 'localhost'
+
+        , # Credential for Target Computers
+        [Parameter(ValueFromPipelineByPropertyName=$true,
+                   ParameterSetName='Credential')]
+        [System.Management.Automation.PSCredential]
+        $Credential
+
+        , # Existing Sessions to query
+        [Parameter(ValueFromPipelineByPropertyName=$true,
+                   ParameterSetName='Default')]
+        [Microsoft.Management.Infrastructure.CimSession[]]
+        $CimSession
     )
 
     Begin
     {
+        $free = {
+            [Math]::Round($this.freeSpace/1gb, 2)
+        }
+        $size = {
+            [Math]::Round($this.Size/1gb, 2)
+        }
+        $percent = {
+            [Math]::Round($this.FreeSpace/$this.Size * 100, 2)
+        }
+
+        if($ComputerName) {
+            $OpenedCimSession = New-CimSession -ComputerName $ComputerName -Credential:$Credential -ErrorAction Stop
+        }
     }
     Process
     {
-        $FreeSpace = @{
-            name="FreeSpace (GB)"
-            expression={
-                [Math]::Round($_.freeSpace/1gb, 2)
-            }
+        $params = @{
+            ClassName = 'Win32_LogicalDisk'
+        }
+        if($OpenedCimSession){
+            $Params.CimSession = $OpenedCimSession
+        }
+        if($CimSession){
+            $Params.CimSession = $CimSession
         }
 
-        $Size = @{
-            name="Size (GB)"
-            expression={
-                [Math]::Round($_.Size/1gb, 2)
-            }
-        }
-        $SourceComputer = @{
-            name="Computer Name"
-            expression={
-                $_.__SERVER
-            }
+        $output = Get-CimInstance @params |
+            Add-Member -passthru -MemberType ScriptProperty -Name 'FreeGB'  -Value $free |
+            Add-Member -passthru -MemberType ScriptProperty -Name 'SizeGB'  -Value $size |
+            Add-Member -passthru -MemberType ScriptProperty -Name 'Percent' -Value $percent |
+            Add-Member -passthru -MemberType AliasProperty  -Name 'ID'      -Value "DeviceID" |
+            Add-Member -passthru -MemberType AliasProperty  -Name 'ComputerName' -Value "SystemName" |
+            Select-Object * -ExcludeProperty PSComputername
+
+        foreach($i in $output){
+            $i.psObject.typeNames.Insert(0, 'JackBennett.util.sysinfo.disks')
         }
 
-        Get-WmiObject `
-            -Class win32_logicaldisk `
-            -ComputerName $ComputerName `
-            -ErrorAction SilentlyContinue `
-            |
-            select `
-                $SourceComputer,
-                deviceid,
-                $FreeSpace,
-                $Size `
-                |
-                Write-Output
+        Write-Output $output
+
+    }
+    end{
+        $OpenedCimSession | Remove-CimSession
     }
 }
 
