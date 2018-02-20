@@ -97,13 +97,14 @@ function Get-LogonHistory
                             StartTime = $StartDay.toShortDateString();
                             EndTime = $StopDay.toShortDateString();
                         } -ErrorAction Stop
+        } catch [System.Exception] {
+            Throw "No events found."
         } catch {
             switch ($ComputerName)
             {
                 'localhost' { Write-Error "Must run as an Administrator to acces logs for $ComputerName" }
                 Default {
-                    Write-Error "$ComputerName cannot be found"
-                    throw $error[1]
+                    throw $psitem
                 }
             }
         }
