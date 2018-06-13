@@ -6,7 +6,7 @@
 #>
 function Copy-MultiItem
 {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess=$true)]
     [OutputType([System.IO.FileInfo])]
     Param
     (
@@ -16,24 +16,35 @@ function Copy-MultiItem
                    ValueFromPipelineByPropertyName=$true,
                    Position=0)]
         [string[]]
-        $Source,
+        $Source
 
-        # Where to copy to
+        , # Where to copy to
         [Parameter(Mandatory=$true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true,
                    Position=1)]
+        [Alias('Target')]
         [string[]]
-        $Path,
+        $Path
 
-        # Output the item copied
+        , # Output the item copied
         [switch]
-        $passThru
+        $PassThru
+
+        , # Output the item copied
+        [switch]
+        $Recurse
+
+        , # Overwrite items that exist
+        [switch]
+        $Force
     )
     Process{
         foreach ($location in $Path){
-            Write-Verbose "Copy $path to $Location"
-            Copy-Item -Path $Source -Destination $location -passThru:$psssThru
+            Write-Verbose "Copy $Source to $Location"
+            if ($PSCmdlet.ShouldProcess($Location, "Copy $Source")) {
+                Copy-Item -Path $Source -Destination $location -Recurse:$Recurse -PassThru:$PassThru -Force:$Force
+            }
         }
     }
 }
