@@ -34,6 +34,30 @@
     \\o16PC08\g$\
     \\o16PC09\g$\
     \\o16PC10\g$\
+.EXAMPLE
+    1..4 | New-ComputerList -Room A,B -Exclude 3
+    Pipe the range 1,2,3,4 into the Computer property and get 2 room names worth A and B. Skip PC 3 in both rooms.
+
+    ComputerName
+    ------------
+    APC01
+    BPC01
+    APC02
+    BPC02
+    APC04
+    BPC04
+.EXAMPLE
+    New-ComputerList -Computer (1..4) -Room A,B -Exclude 3
+    Expand a range to 1,2,3,4 for the Computer property and get 2 room names worth A and B. Skip PC 3 in both rooms.
+
+    ComputerName
+    ------------
+    APC01
+    BPC01
+    APC02
+    BPC02
+    APC04
+    BPC04
 #>
 function New-ComputerList
 {
@@ -50,7 +74,8 @@ function New-ComputerList
         $Room
 
         , # Start PC number, default is 1. leading zero is unnecessary
-        [Parameter(Position=1)]
+        [Parameter(Position=1,
+                   ValueFromPipeline=$true)]
         [int[]]
         $Computer = 1
 
@@ -81,8 +106,6 @@ function New-ComputerList
     {
         #What's the fully qualified domain name in case we need it
         $domain = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain().name
-
-        $Computer = $Computer.where({ $psitem -notin $Exclude })
     }
 
     Process
@@ -95,6 +118,11 @@ function New-ComputerList
 
             # Make a computer for each of the computers specified
             foreach($c in $computer){
+                # Skip computer numbers in the exclude list
+                if($c -in $Exclude){
+                    continue
+                }
+
                 Write-Verbose "adding computer: $c to the room list"
                 # Add this string to our list of computernames with a fully qualified domain name
                 $computerName = "$r`PC$( $c.toString('00') )"
