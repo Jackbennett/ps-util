@@ -1,6 +1,7 @@
 ﻿. (Join-Path $PSScriptRoot 'New-EasyPassword.ps1')
+. (Join-Path $PSScriptRoot 'Get-FunctionDefaultParameter.ps1')
 
-Describe "New-EasyPassword" {
+Describe "New-EasyPassword Functionality" {
     It "Error when making a password shorter than it is long" {
         { New-EasyPassword -MinLength 10 -MaxLength 5 } | Should -Throw
     }
@@ -19,5 +20,31 @@ Describe "New-EasyPassword" {
     It "Default parameters work without issue" {
         { New-EasyPassword } | Should -Not -Throw
     }
+    It "Should return the correct password length" {
+        1..100 |
+        ForEach-Object {
+            New-EasyPassword -MinLength 9 -MaxLength 10
+        } |
+        Where-Object length -ne 9 |
+        Should -BeFalse
+    }
+}
 
+Describe "New-EasyPassword Aliases" {
+    BeforeAll{
+        $Default = Get-FunctionDefaultParameter -FunctionName 'New-EasyPassword'
+    }
+    It "Parameter aliases" {
+        (New-EasyPassword -Min 4 -Max 5).length | Should -BeExactly 4
+    }
+    It "Positional Parameters" {
+        (New-EasyPassword 4 5).length | Should -BeExactly 4
+    }
+    It "Works by Default" {
+        $length = (New-EasyPassword).length
+        $length | Should -BeGreaterOrEqual $Default.MinLength
+
+        $minLength = $Default.MinLength
+        $length | Should -BeLessOrEqual (Invoke-Expression($Default.MaxLength))
+    }
 }
