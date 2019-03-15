@@ -9,7 +9,7 @@
 @{
 
 # Version number of this module.
-ModuleVersion = '1.5.0'
+ModuleVersion = '1.6.0'
 
 # ID used to uniquely identify this module
 GUID = '85f59690-bdb3-4153-b52d-dea64184565a'
@@ -77,13 +77,11 @@ FunctionsToExport = @(
     'Get-DriveFailure',
     'Get-FreeSpace',
     'Get-LogonHistory',
-    'Get-Memory',
     'Get-Shortcut',
     'Get-StartTime',
     'Get-User',
     'Invoke-DscPullAndApply',
     'Move-Drive',
-    'New-ComputerList',
     'New-Directory',
     'New-EasyPassword',
     'New-Shortcut',
