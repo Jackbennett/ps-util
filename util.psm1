@@ -1,7 +1,7 @@
 ﻿Push-Location $PSScriptRoot
 
 # Import all single function files
-Get-ChildItem -Filter '*-*' |
+Get-ChildItem -Filter '*-*' -Exclude '*Tests*' |
     ForEach {
         . $_.FullName
     }
