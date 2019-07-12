@@ -37,7 +37,7 @@ function Approve-Script
         , # which certificate to use in the given store.
         $StoreIndex = 0
         , # Timestamp Service to fix the signature to a known point in Time
-        $TimetampServer = 'http://timestamp.verisign.com/scripts/timstamp.dll'
+        $TimetampServer = 'http://timestamp.verisign.com/scripts/timstamp.dll' # http://timestamp.digicert.com/
     )
 
     Begin
@@ -45,12 +45,9 @@ function Approve-Script
         # Do not leak the certificate into the session
         $private:cert
 
-        try{
-            $private:cert = (Get-ChildItem $CertificateStore -ErrorAction Stop)[$StoreIndex]
-        }
-        catch {
-            Write-Error "Certificate not found in $CertificateStore at $StoreIndex"
-        }
+        # Get-ChildItem Cert:\CurrentUser\UserDS
+
+        $private:cert = (Get-ChildItem $CertificateStore -ErrorAction Stop -CodeSigningCert)[$StoreIndex]
     }
     Process
     {
