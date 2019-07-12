@@ -113,26 +113,42 @@ function Get-StartTime
 .DESCRIPTION
     Get all disk information available from specified computers
 .EXAMPLE
-    Get-FreeSpace
+    Get-FreeSpace  | Sort freepercent
 
-    ComputerName ID ProviderName                                   FreeGB  SizeGB Percent
-    ------------ -- ------------                                   ------  ------ -------
-    ThisComputer A:                                                 188.3  299.81    62.8
-    ThisComputer C:                                                 66.81  117.57   56.83
-    ThisComputer D:                                                267.59  399.87   66.92
-    ThisComputer E:                                                     0       0
-    ThisComputer G: \\Server1\shared$                               66.99  698.49    9.59
-    ThisComputer L: \\Server1\Project$                              66.99  698.49    9.59
-    ThisComputer M: \\Server2\manage$                               70.53     100   70.53
-    ThisComputer N: \\Server1\home$\users\name...                 1396.35 1862.64   74.97
-    ThisComputer O: \\Server1\office$                               66.99  698.49    9.59
-    ThisComputer P: \\Server3\programs$                             26.89     150   17.93
-    ThisComputer Q: \\Server4\secret$                               66.99  698.49    9.59
-    ThisComputer S: \\Server5\application                           18.61     200     9.3
-    ThisComputer T: \\Server4\staff$                                66.99  698.49    9.59
-    ThisComputer V: \\Server6\work$                               1144.24 1862.64   61.43
-    ThisComputer W: \\Server6\work2$                               434.53  698.49   62.21
-    ThisComputer X: \\Server4\shortcut$                           1396.35 1862.64   74.97
+    ComputerName ID VolumeName           Description               FileSystem  Free (GB) Size (GB) Free % Path
+    ------------ -- ----------           -----------               ----------  --------- --------- ------ ----
+    OFFICEPC     D:                      CD-ROM Disc                                   0         0
+    OFFICEPC     P: Data                 Network Connection        NTFS             17.8       150  11.87 \\srv_program01\apps
+    OFFICEPC     T: Shared               Network Connection        NTFS            145.4       900  16.16 \\srv_file02.srv.internal\Shared
+    OFFICEPC     L: Shared               Network Connection        NTFS            145.4       900  16.16 \\srv_file02\Website
+    OFFICEPC     O: Shared               Network Connection        NTFS            145.4       900  16.16 \\srv_file02\office
+    OFFICEPC     G: Shared               Network Connection        NTFS            145.4       900  16.16 \\srv\fileServer\General
+    OFFICEPC     Q: Shared               Network Connection        NTFS            145.4       900  16.16 \\srv_file02\Administrators
+    OFFICEPC     C: srv Computer         Local Fixed Disk          NTFS            30.63    117.44  26.08
+    OFFICEPC     S: Data                 Network Connection        NTFS            66.41    249.87  26.58 \\srv_mis01\sims
+    OFFICEPC     W: Shared               Network Connection        NTFS           372.88    698.49  53.38 \\srv_file01\Students
+    OFFICEPC     F: Space                Local Fixed Disk          NTFS           215.54    399.87   53.9
+    OFFICEPC     H: Google Drive File... Local Fixed Disk          FAT32         1163.97   1862.64  62.49
+    OFFICEPC     N: Home                 Network Connection        NTFS          1225.23   1862.64  65.78 \\srv_file02\home\administrators\USERNAME
+    OFFICEPC     A: VM                   Local Fixed Disk          ReFS           238.16    299.81  79.44
+    OFFICEPC     V: Files                Network Connection        ReFS            91.06     99.94  91.12 \\FileServer\All
+.EXAMPLE
+    Get-FreeSpace -Credential UserA -ComputerName SVR-FILE01, SVR-FILE02
+
+    ComputerName ID VolumeName           Description               FileSystem  Free (GB) Size (GB) Free %
+    ------------ -- ----------           -----------               ----------  --------- --------- ------
+    SVR-FILE01     A:                      3 1/2 Inch Floppy Drive                       0         0
+    SVR-FILE01     C: System               Local Fixed Disk          NTFS            51.07     74.66  68.41
+    SVR-FILE01     D: Home                 Local Fixed Disk          NTFS          1124.65   1862.64  60.38
+    SVR-FILE01     E: Shared               Local Fixed Disk          NTFS           372.88    698.49  53.38
+    SVR-FILE01     F: Shadow Copies        Local Fixed Disk          ReFS           191.03    199.81  95.61
+    SVR-FILE01     Z:                      CD-ROM Disc                                   0         0
+    SVR-FILE02     A:                      3 1/2 Inch Floppy Drive                       0         0
+    SVR-FILE02     C: System               Local Fixed Disk          NTFS            51.17     74.66  68.54
+    SVR-FILE02     D: Home                 Local Fixed Disk          NTFS           1225.2   1862.64  65.78
+    SVR-FILE02     E: Shared               Local Fixed Disk          NTFS            145.4       900  16.16
+    SVR-FILE02     F: Shadow Copies        Local Fixed Disk          ReFS           198.21    199.81   99.2
+    SVR-FILE02     Z:                      CD-ROM Disc                                   0         0
 #>
 function Get-FreeSpace
 {
@@ -192,10 +208,21 @@ function Get-FreeSpace
         $output = Get-CimInstance @params |
             Add-Member -passthru -MemberType ScriptProperty -Name 'FreeGB'  -Value $free |
             Add-Member -passthru -MemberType ScriptProperty -Name 'SizeGB'  -Value $size |
-            Add-Member -passthru -MemberType ScriptProperty -Name 'Percent' -Value $percent |
+            Add-Member -passthru -MemberType ScriptProperty -Name 'FreePercent' -Value $percent |
             Add-Member -passthru -MemberType AliasProperty  -Name 'ID'      -Value "DeviceID" |
             Add-Member -passthru -MemberType AliasProperty  -Name 'ComputerName' -Value "SystemName" |
-            Select-Object * -ExcludeProperty PSComputername
+            Add-Member -passthru -MemberType AliasProperty  -Name 'Path' -Value "ProviderName" |
+            Select-Object @(
+                'ComputerName'
+                'ID'
+                'VolumeName'
+                'Description'
+                'FileSystem'
+                'FreeGB'
+                'SizeGB'
+                'FreePercent'
+                'Path'
+            )
 
         foreach($i in $output){
             $i.psObject.typeNames.Insert(0, 'JackBennett.util.sysinfo.disks')

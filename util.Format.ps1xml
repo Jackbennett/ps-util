@@ -15,19 +15,31 @@
                         <Width>2</Width>
                     </TableColumnHeader>
                     <TableColumnHeader>
-                        <Width>45</Width>
+                        <Width>20</Width>
                     </TableColumnHeader>
                     <TableColumnHeader>
-                        <Width>7</Width>
+                        <Width>25</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Width>11</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <label>Free (GB)</label>
+                        <Width>9</Width>
                         <Alignment>right</Alignment>
                     </TableColumnHeader>
                     <TableColumnHeader>
-                        <Width>7</Width>
+                        <label>Size (GB)</label>
+                        <Width>9</Width>
                         <Alignment>right</Alignment>
                     </TableColumnHeader>
                     <TableColumnHeader>
-                        <Width>7</Width>
+                        <label>Free %</label>
+                        <Width>6</Width>
                         <Alignment>right</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Alignment>left</Alignment>
                     </TableColumnHeader>
                 </TableHeaders>
                 <TableRowEntries>
@@ -40,7 +52,13 @@
                                 <PropertyName>ID</PropertyName>
                             </TableColumnItem>
                             <TableColumnItem>
-                                <PropertyName>ProviderName</PropertyName>
+                                <PropertyName>VolumeName</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>Description</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>FileSystem</PropertyName>
                             </TableColumnItem>
                             <TableColumnItem>
                                 <PropertyName>FreeGB</PropertyName>
@@ -49,7 +67,10 @@
                                 <PropertyName>SizeGB</PropertyName>
                             </TableColumnItem>
                             <TableColumnItem>
-                                <PropertyName>Percent</PropertyName>
+                                <PropertyName>FreePercent</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>Path</PropertyName>
                             </TableColumnItem>
                         </TableColumnItems>
                     </TableRowEntry>
