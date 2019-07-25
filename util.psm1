@@ -1,8 +1,9 @@
 ﻿Push-Location $PSScriptRoot
 
 # Import all single function files
-Get-ChildItem -Filter '*-*' -Exclude '*Tests*' |
-    ForEach {
+Get-ChildItem -filter '*-*' |
+    Where-Object Name -NotLike '*.Tests.ps1' |
+    ForEach-Object {
         . $_.FullName
     }
 
