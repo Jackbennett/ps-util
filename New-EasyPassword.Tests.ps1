@@ -28,6 +28,14 @@ Describe "New-EasyPassword Functionality" {
         Where-Object length -ne 9 |
         Should -BeFalse
     }
+    It "Prefix should respect maxLangth" {
+        { New-EasyPassword -Prefix testing -MaxLength 2} | Should -Throw
+    }
+    It "Prefix should be exactly the length asked" {
+        $result =  New-EasyPassword -Prefix testing -MinLength 10 -MaxLength 10
+
+        $result.length | should -beExactly 10
+    }
 }
 
 Describe "New-EasyPassword Aliases" {
