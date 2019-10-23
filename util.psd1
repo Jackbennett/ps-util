@@ -9,7 +9,7 @@
 @{
 
 # Version number of this module.
-ModuleVersion = '1.9.1'
+ModuleVersion = '1.9.2'
 
 # ID used to uniquely identify this module
 GUID = '85f59690-bdb3-4153-b52d-dea64184565a'
@@ -87,6 +87,7 @@ FunctionsToExport = @(
     'New-Shortcut',
     'Remove-MultiDirectory',
     'Search-HaveIBeenPwned'
+    'Set-FileTime',
     'Set-Shortcut',
     'Suspend-Computer',
     'Test-TCPConnection',
