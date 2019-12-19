@@ -157,24 +157,17 @@ function Get-FreeSpace
     Param
     (
         # Target Systems
-        [Parameter(ValueFromPipelineByPropertyName=$true,
-                   Position=0,
-                   Mandatory,
-                   ParameterSetName='Credential')]
+        [Parameter(ValueFromPipeline,
+                   ValueFromPipelineByPropertyName,
+                   Position=0)]
         [string[]]
         $ComputerName = 'localhost'
 
         , # Credential for Target Computers
-        [Parameter(ValueFromPipelineByPropertyName=$true,
-                   ParameterSetName='Credential')]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [System.Management.Automation.PSCredential]
         $Credential
 
-        , # Existing Sessions to query
-        [Parameter(ValueFromPipelineByPropertyName=$true,
-                   ParameterSetName='Default')]
-        [Microsoft.Management.Infrastructure.CimSession[]]
-        $CimSession
     )
 
     Begin
@@ -189,23 +182,12 @@ function Get-FreeSpace
             [Math]::Round($this.FreeSpace/$this.Size * 100, 2)
         }
 
-        if($ComputerName) {
-            $OpenedCimSession = New-CimSession -ComputerName $ComputerName -Credential:$Credential -ErrorAction Stop
-        }
     }
     Process
     {
-        $params = @{
-            ClassName = 'Win32_LogicalDisk'
-        }
-        if($OpenedCimSession){
-            $Params.CimSession = $OpenedCimSession
-        }
-        if($CimSession){
-            $Params.CimSession = $CimSession
-        }
+        $OpenedCimSession = New-CimSession -ComputerName $ComputerName -Credential:$Credential -ErrorAction "SilentlyContinue"
 
-        $output = Get-CimInstance @params |
+        $output = Get-CimInstance -CimSession $OpenedCimSession -ClassName 'Cim_LogicalDisk' |
             Add-Member -passthru -MemberType ScriptProperty -Name 'FreeGB'  -Value $free |
             Add-Member -passthru -MemberType ScriptProperty -Name 'SizeGB'  -Value $size |
             Add-Member -passthru -MemberType ScriptProperty -Name 'FreePercent' -Value $percent |
@@ -230,8 +212,6 @@ function Get-FreeSpace
 
         Write-Output $output
 
-    }
-    end{
         $OpenedCimSession | Remove-CimSession
     }
 }
