@@ -9,7 +9,7 @@
 @{
 
 # Version number of this module.
-ModuleVersion = '1.9.3'
+ModuleVersion = '1.10.0'
 
 # ID used to uniquely identify this module
 GUID = '85f59690-bdb3-4153-b52d-dea64184565a'
@@ -116,6 +116,6 @@ AliasesToExport = '*'
 # HelpInfoURI = ''
 
 # Default prefix for commands exported from this module. Override the default prefix using Import-Module -Prefix.
-# DefaultCommandPrefix = ''
+DefaultCommandPrefix = 'my'
 
 }
