@@ -37,21 +37,28 @@ function Approve-Script
         , # which certificate to use in the given store.
         $StoreIndex = 0
         , # Timestamp Service to fix the signature to a known point in Time
-        $TimetampServer = 'http://timestamp.verisign.com/scripts/timstamp.dll' # http://timestamp.digicert.com/
+        $TimestampServer = 'http://timestamp.digicert.com/' # http://timestamp.digicert.com/
+        , # Whatif binding
+        [switch]
+        $WhatIf
     )
 
     Begin
     {
-        # Do not leak the certificate into the session
-        $private:cert
-
+        # Do not leak the certificate into the session with $private:
         # Get-ChildItem Cert:\CurrentUser\UserDS
 
-        $private:cert = (Get-ChildItem $CertificateStore -ErrorAction Stop -CodeSigningCert)[$StoreIndex]
+        $private:auth_args = @{
+         Certificate = (Get-ChildItem $CertificateStore -ErrorAction Stop -CodeSigningCert)[$StoreIndex]
+         TimestampServer = $TimestampServer
+         IncludeChain = "all"
+         HashAlgorithm = "SHA256"
+         WhatIf = $WhatIf
+        }
     }
     Process
     {
-        $Path | Set-AuthenticodeSignature -Certificate $private:cert -TimestampServer $TimetampServer -IncludeChain all
+        $Path | Set-AuthenticodeSignature @private:auth_args
     }
     End
     {
