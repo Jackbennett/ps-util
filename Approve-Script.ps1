@@ -30,6 +30,7 @@ function Approve-Script
                    Position=0)]
         [Alias('Name')]
         [String[]]
+        [System.IO.FileInfo[]]
         $Path
 
         , # Path to the certificate store to use.
