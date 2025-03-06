@@ -1,19 +1,31 @@
 function ConvertTo-Base64 {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName="String")]
     [OutputType([String])]
     Param
     (
         # File to encode the contents of
-        [Parameter(Mandatory=$true,
+        [Parameter(ParameterSetName="File",
+                   Mandatory=$true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true,
                    Position=0)]
-        [string]
+        [System.IO.FileInfo]
         $Path
+
+        , # File to encode the contents of
+        [Parameter(ParameterSetName="String",
+                   Mandatory=$true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true,
+                   Position=0)]
+        [String]
+        $Text
     )
 
     Process{
-        $Text = Get-content -raw -Path $Path
+        if($PSCmdlet.ParameterSetName -eq "File") {
+            $Text = Get-content -raw -Path $Path
+        }
         $String = [Convert]::ToBase64String( [System.Text.Encoding]::UTF8.GetBytes($Text) )
 
         Write-Output $String
